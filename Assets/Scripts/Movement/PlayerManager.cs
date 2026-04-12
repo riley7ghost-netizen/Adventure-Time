@@ -12,10 +12,7 @@ public class PlayerManager : MonoBehaviour
     private float colorTimer = 0f;
     private bool isColorChanged = false;
 
-    [SerializeField]
-    private float moveSpeed = 20f;
-    private Vector3 startPos;
-    private Vector3 oldPos;
+    [SerializeField] private float moveSpeed = 20f;
     //private float lastMoveTime = -Mathf.Infinity;
 
     public KeyCode[] controlKeys = new KeyCode[]
@@ -25,7 +22,7 @@ public class PlayerManager : MonoBehaviour
         KeyCode.S,
         KeyCode.D
     };
-    public Vector3 lastPosition;
+
 
     void Awake()
     {
@@ -33,8 +30,6 @@ public class PlayerManager : MonoBehaviour
     }
     void Start()
     {
-        Debug.Log($"PlayerManager");
-        lastPosition = transform.position;
         rend = GetComponent<Renderer>();
 
         if (rend != null && rend.material != null)
@@ -45,9 +40,9 @@ public class PlayerManager : MonoBehaviour
 
     void Update()
     {
-        lastPosition = transform.position;
-        oldPos = transform.position;
+        Vector3 lastPosition = transform.position;
         Move();
+        playerSpeed = (transform.position - lastPosition)/Time.deltaTime;
         if (Input.GetKeyDown(KeyCode.Space) && rend != null)
         {
             rend.material.color = Color.red;
@@ -84,7 +79,6 @@ public class PlayerManager : MonoBehaviour
         {
             transform.position += Vector3.right * moveSpeed * Time.deltaTime;
         }
-        playerSpeed = transform.position - oldPos;
     }
     // private Vector3 truncate( Vector3 steeringDir, float max_force)
     // {

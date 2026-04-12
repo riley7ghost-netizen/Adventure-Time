@@ -9,7 +9,7 @@ public class testscript : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Update()
     {
-        force = CRManager.Truncate(new Vector3(10, 0, 0));
-        rb.AddForce(force);
+        // force = CRManager.Truncate(new Vector3(10, 0, 0));
+        // rb.AddForce(force);
     }
 }
