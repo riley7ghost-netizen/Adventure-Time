@@ -2,158 +2,150 @@ using UnityEngine;
 
 public class CRManager : MonoBehaviour
 {
-    //Idle 參數
-    [SerializeField] private float _moveSpeed = 1f;//移速 default 1
-    [SerializeField] private float _turnSpeed = 60f;//轉向速度
-    [SerializeField] private float _directionChangeInterval = 5f;//轉向間隔
-    [SerializeField] private float _areaRadius = 25f;//限制移動範圍
-    [SerializeField] private Vector3 _areaCenter =  new Vector3(0f, 1f, 0f);//中心
+    // --- Reynolds Simple Vehicle Model ---
+    [SerializeField] private float _maxSpeed = 3f;
+    [SerializeField] private float _maxForce = 10f;
+    [SerializeField] private float _mass     = 1f;
+    [SerializeField] private float _turnSpeed = 120f;
 
-    [SerializeField] private Transform _playerTransform;
-    [SerializeField] Rigidbody _rb;
+    // --- Area Boundary ---
+    [SerializeField] private float   _areaRadius = 25f;
+    [SerializeField] private Vector3 _areaCenter = new Vector3(0f, 1f, 0f);
+
+    // --- Interaction ---
+    [SerializeField] private float _triggerDistance  = 20f;
+    [SerializeField] private float _keyCooldown      = 0.5f;
+    [SerializeField] private float _chaseFleeDuration = 5f;
+
+    // --- Wander (Reynolds sphere-projection method) ---
+    [SerializeField] private float _wanderDistance = 2f;    // sphere center distance ahead
+    [SerializeField] private float _wanderRadius   = 1.5f;  // sphere radius
+    [SerializeField] private float _wanderJitter   = 40f;   // degrees/sec angular jitter
+
+    // Inspector-visible state (read-only during play)
     [SerializeField] private Phase _phase;
 
-    // 玩家互動參數
-    [SerializeField] private float _keyCooldown = 0.5f; // 按鍵冷卻秒數
-    [SerializeField] float _timer;
-    [SerializeField] float _nextTriggerTime = 0f;
-    [SerializeField] float _getAffectedTime = 0f;
-    [SerializeField] float _chaseFleeDuration = 5f;
-    [SerializeField] private float _directionChangeTime = 0f;
-    [SerializeField] private Vector3 _direction;
-    [SerializeField] private Vector3 _velocity;
-    [SerializeField] private Vector3 _steeringDirection;
-    [SerializeField] private float _distance = 100f;//與玩家距離
-    [SerializeField] private float _triggerDistance = 20f;//觸發距離
-    [SerializeField] private float _maxForce = 10f;
-    [SerializeField] private float _minForce = 5f;
-    Quaternion _targetRotation;
+    [SerializeField] private Rigidbody _rb;
 
-    [SerializeField] Vector3 targetPos;
+    private Transform _playerTransform;
+    private Vector3   _velocity;
+    private float     _timer;
+    private float     _nextTriggerTime;
+    private float     _getAffectedTime;
+    private float     _wanderAngle;
+    private float     _currentMaxSpeed;
+
+    public enum Phase { idle, chase, flee }
+
+    // -------------------------------------------------------
+    // Lifecycle
+    // -------------------------------------------------------
+
+    void OnEnable()  => PlayerManager.OnInteract += HandleInteract;
+    void OnDisable() => PlayerManager.OnInteract -= HandleInteract;
+
     void Start()
     {
-        _phase = Phase.idle;
-        PickNewDirection();
+        _playerTransform = PlayerManager.Instance.transform;
+        _phase           = Phase.idle;
+        _currentMaxSpeed = _maxSpeed;
+        _wanderAngle     = Random.Range(0f, 360f);
     }
 
     void Update()
     {
         _timer += Time.deltaTime;
-        _distance = Vector3.Distance(transform.position, _playerTransform.position);
 
-
-        //nextTriggerTime 是避免玩家按太快的按鍵冷卻時間
-        //chaseFleeDuration 是追擊狀態維持的時間
-        if (_timer > _nextTriggerTime)
+        // Return to idle when chase/flee duration expires
+        if (_phase != Phase.idle && _timer > _getAffectedTime + _chaseFleeDuration)
         {
-            if (Input.GetKeyDown(KeyCode.Space) && _distance < _triggerDistance)
-            {
-                _moveSpeed = _distance / 10; //距離越遠移動越快
-                SetCRState();
-            }
+            _phase           = Phase.idle;
+            _currentMaxSpeed = _maxSpeed;
         }
 
-        if ((_phase != Phase.idle) && _timer < (_getAffectedTime + _chaseFleeDuration) && _playerTransform != null)
-        {
-            SeekOrFlee();
-        }
-        else
-        {
-            if (_phase != Phase.idle)
-            {
-                _phase = Phase.idle;
-            }
-            if (_timer > _directionChangeTime)
-            {
-                _directionChangeTime = _timer + _directionChangeInterval;
-                PickNewDirection();
-            }
-        }
+        // --- Compute steering direction from current behavior ---
+        Vector3 steeringDir = _phase == Phase.idle ? Wander() : SeekOrFlee();
 
-        // 面向方向
-        if (_steeringDirection != Vector3.zero)
-        {
-            _targetRotation = Quaternion.LookRotation(_steeringDirection);
-        }
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, _targetRotation, _turnSpeed * Time.deltaTime);
-
-        Vector3 steering_force = Truncate(_steeringDirection);
-        Vector3 acceleration = steering_force / _rb.mass;
-        _velocity = acceleration;
-        //_rb.AddForce(_force); 不好控制
-        _rb.linearVelocity = acceleration;
-
+        // --- Boundary containment: override steering if outside area ---
         Vector3 toCenter = _areaCenter - transform.position;
         if (toCenter.magnitude > _areaRadius)
-        {
-            _steeringDirection = toCenter.normalized;//超出範圍回彈
-        }
+            steeringDir = toCenter.normalized * _maxForce;
 
-        Debug.Log($"targetNextPos{targetPos} _playerTransform.position {_playerTransform.position} _moveSpeed {_moveSpeed} ");
+        // --- Reynolds physics integration ---
+        // steering_force = truncate(steering_direction, max_force)
+        // acceleration   = steering_force / mass
+        // velocity       = truncate(velocity + acceleration * dt, max_speed)
+        Vector3 steeringForce = Vector3.ClampMagnitude(steeringDir, _maxForce);
+        Vector3 acceleration  = steeringForce / _mass;
+        _velocity             = Vector3.ClampMagnitude(_velocity + acceleration * Time.deltaTime, _currentMaxSpeed);
+        _rb.linearVelocity    = _velocity;
+
+        // --- Velocity-aligned orientation ---
+        if (_velocity.magnitude > 0.1f)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(_velocity);
+            transform.rotation  = Quaternion.RotateTowards(transform.rotation, targetRot, _turnSpeed * Time.deltaTime);
+        }
     }
 
-    void SetCRState()
+    // -------------------------------------------------------
+    // Interaction (triggered by PlayerManager.OnInteract event)
+    // -------------------------------------------------------
+
+    void HandleInteract()
     {
-        //重設觸發時間
+        if (_timer < _nextTriggerTime) return;
+
+        float distance = Vector3.Distance(transform.position, _playerTransform.position);
+        if (distance >= _triggerDistance) return;
+
         _nextTriggerTime = _timer + _keyCooldown;
-
-        //隨機設定狀態Flee or Chase
-        if (Random.Range(0f, 1f) < 0.2f)
-        {
-            _phase = Phase.flee;
-            _getAffectedTime = _timer;
-        }
-        else
-        {
-            _phase = Phase.chase;
-            _getAffectedTime = _timer;
-        }
+        _getAffectedTime = _timer;
+        // Speed scales with distance: farther away = faster response
+        _currentMaxSpeed = distance / 10f;
+        _phase           = Random.value < 0.2f ? Phase.flee : Phase.chase;
     }
 
-    //方向定義
-    // new_forward = velocity.normalized
-    // approximate_up = normalize (approximate_up)
-    // new_side = cross (new_forward, approximate_up)
-    // new_up = cross (new_forward, new_side)
-    void SeekOrFlee()//給normalized vector3* _moveSpeed
+    // -------------------------------------------------------
+    // Steering behaviors
+    // -------------------------------------------------------
+
+    // Seek / Flee  (Reynolds formula: steering = desired_velocity - current_velocity)
+    Vector3 SeekOrFlee()
     {
-        //Vector3 moveDir = PlayerManager.Instance.playerSpeed;
-        targetPos = Vector3.Scale(_playerTransform.position, new Vector3(1, 0, 1));
+        Vector3 flatSelf   = Flatten(transform.position);
+        Vector3 flatTarget = Flatten(_playerTransform.position);
 
-        Vector3 desired_velocity;
-        if (_phase == Phase.chase)
-        {
-            desired_velocity = Flatten(targetPos - Vector3.Scale(transform.position, new Vector3(1, 0, 1))).normalized * _moveSpeed;
-        }
-        else
-        {
-            desired_velocity = Flatten(Vector3.Scale(transform.position, new Vector3(1, 0, 1)) - targetPos).normalized * _moveSpeed;
-        }
-        _steeringDirection = desired_velocity + _velocity;
+        Vector3 toTarget       = flatTarget - flatSelf;
+        Vector3 desiredVelocity = _phase == Phase.chase
+            ? toTarget.normalized  * _currentMaxSpeed
+            : -toTarget.normalized * _currentMaxSpeed;
+
+        return desiredVelocity - Flatten(_velocity);
     }
 
-    void PickNewDirection()//給normalized vector3* _moveSpeed
+    // Wander  (Reynolds sphere-projection method)
+    // A point is constrained to a sphere slightly ahead of the agent.
+    // Each frame a small random angular displacement is added, producing a
+    // smooth "random walk" in steering direction.
+    Vector3 Wander()
     {
-        _steeringDirection = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized * 1; //1=_moveSpeed
-        _directionChangeTime = _timer + _directionChangeInterval;
+        _wanderAngle += Random.Range(-_wanderJitter, _wanderJitter) * Time.deltaTime;
+
+        Vector3 forward      = _velocity.magnitude > 0.01f
+            ? Flatten(_velocity).normalized
+            : transform.forward;
+
+        Vector3 circleCenter = forward * _wanderDistance;
+        float   angleRad     = _wanderAngle * Mathf.Deg2Rad;
+        Vector3 displacement = new Vector3(Mathf.Cos(angleRad), 0f, Mathf.Sin(angleRad)) * _wanderRadius;
+
+        return circleCenter + displacement;
     }
 
-    public Vector3 Truncate(Vector3 steeringDir) //變成將速度轉成力並給予上下限
-    {
-        var output = Mathf.Min(steeringDir.magnitude, _maxForce);
-        output = Mathf.Max(output, _minForce);
-        Vector3 f = steeringDir.normalized * output;
-        return f;
-    }
-    public enum Phase
-    {
-        flee,
-        chase,
-        idle
-    }
+    // -------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------
 
-    static Vector3 Flatten(Vector3 v)
-    {
-        return new Vector3(v.x, 0f, v.z);
-    }
+    static Vector3 Flatten(Vector3 v) => new Vector3(v.x, 0f, v.z);
 }

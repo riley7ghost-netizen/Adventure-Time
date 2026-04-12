@@ -1,113 +1,83 @@
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
 public class PlayerManager : MonoBehaviour
 {
     public static PlayerManager Instance;
-    [SerializeField]
-    public Vector3 playerSpeed;
-    private Color originalColor;
-    private Renderer rend;
-    private float colorTimer = 0f;
-    private bool isColorChanged = false;
+    public static event System.Action OnInteract;
 
-    [SerializeField] private float moveSpeed = 20f;
-    //private float lastMoveTime = -Mathf.Infinity;
+    // Reynolds Simple Vehicle Model parameters
+    [SerializeField] private float _maxSpeed = 10f;
+    [SerializeField] private float _maxForce = 60f;
+    [SerializeField] private float _mass     = 1f;
+
+    public Vector3 Velocity => _velocity;
 
     public KeyCode[] controlKeys = new KeyCode[]
     {
-        KeyCode.W,
-        KeyCode.A,
-        KeyCode.S,
-        KeyCode.D
+        KeyCode.W, KeyCode.A, KeyCode.S, KeyCode.D
     };
 
+    private Vector3 _velocity;
+    private Color   _originalColor;
+    private Renderer _rend;
+    private float   _colorTimer;
+    private bool    _isColorChanged;
 
-    void Awake()
-    {
-        Instance = this;
-    }
+    void Awake() => Instance = this;
+
     void Start()
     {
-        rend = GetComponent<Renderer>();
-
-        if (rend != null && rend.material != null)
-        {
-            originalColor = rend.material.color;
-        }
+        _rend = GetComponent<Renderer>();
+        if (_rend != null)
+            _originalColor = _rend.material.color;
     }
 
     void Update()
     {
-        Vector3 lastPosition = transform.position;
-        Move();
-        playerSpeed = (transform.position - lastPosition)/Time.deltaTime;
-        if (Input.GetKeyDown(KeyCode.Space) && rend != null)
-        {
-            rend.material.color = Color.red;
-            colorTimer = 0.25f;
-            isColorChanged = true;
-        }
+        // --- Reynolds Steering (Seek toward input direction) ---
+        // desired_velocity = input_direction * max_speed
+        // steering         = desired_velocity - velocity          (velocity error)
+        // steering_force   = truncate(steering, max_force)
+        // acceleration     = steering_force / mass
+        // velocity         = truncate(velocity + acceleration*dt, max_speed)
+        // position         = position + velocity*dt
+        Vector3 desiredVelocity = GetInputDirection() * _maxSpeed;
+        Vector3 steering        = Vector3.ClampMagnitude(desiredVelocity - _velocity, _maxForce);
+        Vector3 acceleration    = steering / _mass;
+        _velocity               = Vector3.ClampMagnitude(_velocity + acceleration * Time.deltaTime, _maxSpeed);
+        transform.position     += _velocity * Time.deltaTime;
 
-        if (isColorChanged && rend != null)
+        // --- Space: broadcast interaction event + visual flash ---
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            colorTimer -= Time.deltaTime;
-            if (colorTimer <= 0f)
+            OnInteract?.Invoke();
+
+            if (_rend != null)
             {
-                rend.material.color = originalColor;
-                isColorChanged = false;
+                _rend.material.color = Color.red;
+                _colorTimer          = 0.25f;
+                _isColorChanged      = true;
             }
         }
 
+        if (_isColorChanged && _rend != null)
+        {
+            _colorTimer -= Time.deltaTime;
+            if (_colorTimer <= 0f)
+            {
+                _rend.material.color = _originalColor;
+                _isColorChanged      = false;
+            }
+        }
     }
-    void Move()
+
+    private Vector3 GetInputDirection()
     {
-        if (Input.GetKey(controlKeys[0])) // W
-        {
-            transform.position += Vector3.forward * moveSpeed * Time.deltaTime;
-        }
-        if (Input.GetKey(controlKeys[1])) // A
-        {
-            transform.position += Vector3.left * moveSpeed * Time.deltaTime;
-        }
-        if (Input.GetKey(controlKeys[2])) // S
-        {
-            transform.position += Vector3.back * moveSpeed * Time.deltaTime;
-        }
-        if (Input.GetKey(controlKeys[3])) // D
-        {
-            transform.position += Vector3.right * moveSpeed * Time.deltaTime;
-        }
+        Vector3 dir = Vector3.zero;
+        if (Input.GetKey(controlKeys[0])) dir += Vector3.forward;
+        if (Input.GetKey(controlKeys[1])) dir += Vector3.left;
+        if (Input.GetKey(controlKeys[2])) dir += Vector3.back;
+        if (Input.GetKey(controlKeys[3])) dir += Vector3.right;
+        return dir.normalized;
     }
-    // private Vector3 truncate( Vector3 steeringDir, float max_force)
-    // {
-    //     Vector3 f = steeringDir.normalized * max_force;
-    //     return f;
-    // }
-
-    //物理模型
-    // steering_force = truncate (steering_direction, max_force)
-    // acceleration = steering_force / mass
-    // velocity = truncate (velocity + acceleration, max_speed)
-    // position = position + velocity
-
-    //方向定義
-    // new_forward = velocity.normalized
-    // approximate_up = normalize (approximate_up)
-    // new_side = cross (new_forward, approximate_up)
-    // new_up = cross (new_forward, new_side)
-
-    //Seek
-    // target = player.transform + player.vel*time.deltatime
-    // desired_velocity = (position - target).normalized * max_speed;
-    // steering = desired_velocity - velocity;
-
-    //Arrival
-    // target_offset = target - position;
-    // distance = length (target_offset);
-    // ramped_speed = max_speed * (distance / slowing_distance);
-    // clipped_speed = minimum (ramped_speed, max_speed);
-    // desired_velocity = (clipped_speed / distance) * target_offset;
-    // steering = desired_velocity - velocity;
 }
