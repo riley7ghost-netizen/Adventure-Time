@@ -102,7 +102,7 @@ public class CRManager : MonoBehaviour
         _nextTriggerTime = _timer + _keyCooldown;
         _getAffectedTime = _timer;
         // Speed scales with distance: farther away = faster response
-        _currentMaxSpeed = distance / 10f;
+        _currentMaxSpeed = distance / 0.5f;
         _phase           = Random.value < 0.2f ? Phase.flee : Phase.chase;
     }
 

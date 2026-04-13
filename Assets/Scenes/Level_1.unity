@@ -182,7 +182,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -253,28 +253,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0f1c007ee3044247b4c90db5ae5a278, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveSpeed: 0.2
+  _maxSpeed: 30
+  _maxForce: 100
+  _mass: 1
   _turnSpeed: 60
-  _directionChangeInterval: 5
   _areaRadius: 25
   _areaCenter: {x: 10, y: 1, z: 10}
-  _playerTransform: {fileID: 554920041}
-  _rb: {fileID: 6266924}
-  _phase: 0
+  _triggerDistance: 50
   _keyCooldown: 0.5
-  _timer: 0
-  _nextTriggerTime: 0
-  _getAffectedTime: 0
   _chaseFleeDuration: 5
-  _directionChangeTime: 0
-  _direction: {x: 0, y: 0, z: 0}
-  _velocity: {x: 0, y: 0, z: 0}
-  _steeringDirection: {x: 0, y: 0, z: 0}
-  _distance: 100
-  _triggerDistance: 10
-  _maxForce: 10
-  _minForce: 5
-  targetPos: {x: 0, y: 0, z: 0}
+  _wanderDistance: 2
+  _wanderRadius: 1.5
+  _wanderJitter: 40
+  _phase: 0
+  _rb: {fileID: 6266924}
 --- !u!4 &6266929
 Transform:
   m_ObjectHideFlags: 0
@@ -353,7 +345,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -424,28 +416,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0f1c007ee3044247b4c90db5ae5a278, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveSpeed: 0.2
+  _maxSpeed: 30
+  _maxForce: 100
+  _mass: 1
   _turnSpeed: 60
-  _directionChangeInterval: 5
   _areaRadius: 25
   _areaCenter: {x: 0, y: 1, z: -10}
-  _playerTransform: {fileID: 554920041}
-  _rb: {fileID: 238524978}
-  _phase: 0
+  _triggerDistance: 50
   _keyCooldown: 0.5
-  _timer: 0
-  _nextTriggerTime: 0
-  _getAffectedTime: 0
   _chaseFleeDuration: 5
-  _directionChangeTime: 0
-  _direction: {x: 0, y: 0, z: 0}
-  _velocity: {x: 0, y: 0, z: 0}
-  _steeringDirection: {x: 0, y: 0, z: 0}
-  _distance: 100
-  _triggerDistance: 10
-  _maxForce: 10
-  _minForce: 5
-  targetPos: {x: 0, y: 0, z: 0}
+  _wanderDistance: 2
+  _wanderRadius: 1.5
+  _wanderJitter: 40
+  _phase: 0
+  _rb: {fileID: 238524978}
 --- !u!4 &238524983
 Transform:
   m_ObjectHideFlags: 0
@@ -496,7 +480,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -651,7 +635,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -722,28 +706,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0f1c007ee3044247b4c90db5ae5a278, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveSpeed: 0.2
+  _maxSpeed: 30
+  _maxForce: 100
+  _mass: 1
   _turnSpeed: 60
-  _directionChangeInterval: 5
   _areaRadius: 25
   _areaCenter: {x: 0, y: 1, z: 10}
-  _playerTransform: {fileID: 554920041}
-  _rb: {fileID: 311154324}
-  _phase: 0
+  _triggerDistance: 50
   _keyCooldown: 0.5
-  _timer: 0
-  _nextTriggerTime: 0
-  _getAffectedTime: 0
   _chaseFleeDuration: 5
-  _directionChangeTime: 0
-  _direction: {x: 0, y: 0, z: 0}
-  _velocity: {x: 0, y: 0, z: 0}
-  _steeringDirection: {x: 0, y: 0, z: 0}
-  _distance: 100
-  _triggerDistance: 10
-  _maxForce: 10
-  _minForce: 5
-  targetPos: {x: 0, y: 0, z: 0}
+  _wanderDistance: 2
+  _wanderRadius: 1.5
+  _wanderJitter: 40
+  _phase: 0
+  _rb: {fileID: 311154324}
 --- !u!4 &311154329
 Transform:
   m_ObjectHideFlags: 0
@@ -1179,7 +1155,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -1375,7 +1351,7 @@ Transform:
   m_GameObject: {fileID: 554920037}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: 1.5}
+  m_LocalPosition: {x: -1.1, y: 2, z: -29}
   m_LocalScale: {x: 4, y: 4, z: 4}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -1394,8 +1370,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31b9930b114fc934d8264349e2941a2c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerSpeed: {x: 0, y: 0, z: 0}
-  moveSpeed: 20
+  _maxSpeed: 20
+  _maxForce: 80
+  _mass: 1
   controlKeys: 77000000610000007300000064000000
 --- !u!54 &554920043
 Rigidbody:
@@ -1645,7 +1622,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -1716,28 +1693,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0f1c007ee3044247b4c90db5ae5a278, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveSpeed: 0.2
+  _maxSpeed: 30
+  _maxForce: 100
+  _mass: 1
   _turnSpeed: 60
-  _directionChangeInterval: 5
   _areaRadius: 25
   _areaCenter: {x: -10, y: 1, z: 0}
-  _playerTransform: {fileID: 554920041}
-  _rb: {fileID: 1254647635}
-  _phase: 0
+  _triggerDistance: 50
   _keyCooldown: 0.5
-  _timer: 0
-  _nextTriggerTime: 0
-  _getAffectedTime: 0
   _chaseFleeDuration: 5
-  _directionChangeTime: 0
-  _direction: {x: 0, y: 0, z: 0}
-  _velocity: {x: 0, y: 0, z: 0}
-  _steeringDirection: {x: 0, y: 0, z: 0}
-  _distance: 100
-  _triggerDistance: 10
-  _maxForce: 10
-  _minForce: 5
-  targetPos: {x: 0, y: 0, z: 0}
+  _wanderDistance: 2
+  _wanderRadius: 1.5
+  _wanderJitter: 40
+  _phase: 0
+  _rb: {fileID: 1254647635}
 --- !u!4 &1254647640
 Transform:
   m_ObjectHideFlags: 0
@@ -1981,7 +1950,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -2052,28 +2021,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0f1c007ee3044247b4c90db5ae5a278, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveSpeed: 0.2
+  _maxSpeed: 30
+  _maxForce: 100
+  _mass: 1
   _turnSpeed: 60
-  _directionChangeInterval: 5
   _areaRadius: 25
   _areaCenter: {x: 10, y: 1, z: 0}
-  _playerTransform: {fileID: 554920041}
-  _rb: {fileID: 1864921618}
-  _phase: 0
+  _triggerDistance: 50
   _keyCooldown: 0.5
-  _timer: 0
-  _nextTriggerTime: 0
-  _getAffectedTime: 0
   _chaseFleeDuration: 5
-  _directionChangeTime: 0
-  _direction: {x: 0, y: 0, z: 0}
-  _velocity: {x: 0, y: 0, z: 0}
-  _steeringDirection: {x: 0, y: 0, z: 0}
-  _distance: 100
-  _triggerDistance: 10
-  _maxForce: 10
-  _minForce: 5
-  targetPos: {x: 0, y: 0, z: 0}
+  _wanderDistance: 2
+  _wanderRadius: 1.5
+  _wanderJitter: 40
+  _phase: 0
+  _rb: {fileID: 1864921618}
 --- !u!4 &1864921623
 Transform:
   m_ObjectHideFlags: 0
@@ -2125,7 +2086,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -2238,28 +2199,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0f1c007ee3044247b4c90db5ae5a278, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveSpeed: 0.2
+  _maxSpeed: 30
+  _maxForce: 100
+  _mass: 1
   _turnSpeed: 60
-  _directionChangeInterval: 5
   _areaRadius: 25
   _areaCenter: {x: 0, y: 1, z: 0}
-  _playerTransform: {fileID: 554920041}
-  _rb: {fileID: 1950270461}
-  _phase: 0
+  _triggerDistance: 50
   _keyCooldown: 0.5
-  _timer: 0
-  _nextTriggerTime: 0
-  _getAffectedTime: 0
   _chaseFleeDuration: 5
-  _directionChangeTime: 0
-  _direction: {x: 0, y: 0, z: 0}
-  _velocity: {x: 0, y: 0, z: 0}
-  _steeringDirection: {x: 0, y: 0, z: 0}
-  _distance: 100
-  _triggerDistance: 10
-  _maxForce: 10
-  _minForce: 5
-  targetPos: {x: 0, y: 0, z: 0}
+  _wanderDistance: 2
+  _wanderRadius: 1.5
+  _wanderJitter: 40
+  _phase: 0
+  _rb: {fileID: 1950270461}
 --- !u!1 &2007077287
 GameObject:
   m_ObjectHideFlags: 0
