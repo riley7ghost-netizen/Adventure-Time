@@ -94,15 +94,21 @@ public class CRManager : MonoBehaviour
 
     void HandleInteract()
     {
-        if (_timer < _nextTriggerTime) return;
+        // 避免連點
+        if (_timer < _nextTriggerTime) 
+            return;
 
+        // 進入偵測範圍
         float distance = Vector3.Distance(transform.position, _playerTransform.position);
-        if (distance >= _triggerDistance) return;
+        if (distance >= _triggerDistance) 
+            return;
 
         _nextTriggerTime = _timer + _keyCooldown;
         _getAffectedTime = _timer;
+
         // Speed scales with distance: farther away = faster response
-        _currentMaxSpeed = distance / 0.5f;
+        _currentMaxSpeed = distance / 0.5f; //追擊或逃離的速度
+
         _phase           = Random.value < 0.2f ? Phase.flee : Phase.chase;
     }
 
@@ -110,13 +116,28 @@ public class CRManager : MonoBehaviour
     // Steering behaviors
     // -------------------------------------------------------
 
-    // Seek / Flee  (Reynolds formula: steering = desired_velocity - current_velocity)
+    // Pursuit / Flee  (Reynolds formula: steering = desired_velocity - current_velocity)
+    // Chase: Pursuit — seek player's predicted future position
+    // Flee:  Flee   — flee from player's current position
     Vector3 SeekOrFlee()
     {
         Vector3 flatSelf   = Flatten(transform.position);
         Vector3 flatTarget = Flatten(_playerTransform.position);
 
-        Vector3 toTarget       = flatTarget - flatSelf;
+        Vector3 target;
+        if (_phase == Phase.chase)
+        {
+            // Pursuit: T = distance / my_speed  (Reynolds simple estimator)
+            float   T         = Vector3.Distance(flatSelf, flatTarget) / _currentMaxSpeed;
+            Vector3 playerVel = Flatten(PlayerManager.Instance.Velocity);
+            target = flatTarget + playerVel * T;
+        }
+        else
+        {
+            target = flatTarget;
+        }
+
+        Vector3 toTarget        = target - flatSelf;
         Vector3 desiredVelocity = _phase == Phase.chase
             ? toTarget.normalized  * _currentMaxSpeed
             : -toTarget.normalized * _currentMaxSpeed;

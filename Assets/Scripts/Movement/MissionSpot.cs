@@ -15,15 +15,15 @@ public class MissionSpot : MonoBehaviour
     }
     void Update()
     {
-        if(_playerInside)
+        if (_playerInside)
         {
-           if(_timer < _completeTime)
+           if (_timer < _completeTime)
             {
                 _timer += Time.deltaTime;
                 rend.material.color = Color.green;
             }
         }
-        if(!_isComplete && _timer > _completeTime)
+        if (!_isComplete && _timer > _completeTime)
         {
             _isComplete = true;
             rend.material.color = Color.black;
