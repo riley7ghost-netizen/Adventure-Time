@@ -32,13 +32,16 @@ public partial class PlayerSystem : SystemBase
         if (dirLen > 0.001f) dir /= dirLen;
         bool interact = Input.GetKeyDown(KeyCode.Space);
 
-        float3 outPos = float3.zero;
-        float3 outVel = float3.zero;
+        float3 outPos      = float3.zero;
+        float3 outVel      = float3.zero;
+        bool   outImmune   = false;
 
-        foreach (var (vehicle, transform, flash) in
-            SystemAPI.Query<RefRW<VehicleData>, RefRW<LocalTransform>, RefRW<InteractFlashData>>()
+        foreach (var (vehicle, transform, flash, immunity) in
+            SystemAPI.Query<RefRW<VehicleData>, RefRW<LocalTransform>,
+                            RefRW<InteractFlashData>, RefRO<PlayerImmunityData>>()
             .WithAll<PlayerTag>())
         {
+            outImmune = immunity.ValueRO.isImmune;
             // Reynolds steering:
             //   desired  = input_dir * max_speed
             //   steering = clamp(desired - velocity, max_force)
@@ -69,7 +72,8 @@ public partial class PlayerSystem : SystemBase
         {
             position          = outPos,
             velocity          = outVel,
-            interactThisFrame = interact
+            interactThisFrame = interact,
+            isImmune          = outImmune
         });
     }
 

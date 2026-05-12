@@ -46,10 +46,16 @@ public class ECSBootstrap : MonoBehaviour
     [SerializeField] float missionCompleteTime = 20f;
     [SerializeField] float missionSpotRadius   = 2f;
 
+    [Header("Immunity Items")]
+    [SerializeField] Transform[] immunityItemTransforms;
+    [SerializeField] float immunityPickupRadius = 2f;
+    [SerializeField] float immunityDuration     = 60f;
+
     // Entity handles — TransformSyncBridge / VisualBridge 透過這裡取得對應 entity
     Entity   _playerEntity;
     Entity[] _crEntities;
     Entity[] _missionEntities;
+    Entity[] _immunityEntities;
 
     void Awake()
     {
@@ -67,6 +73,10 @@ public class ECSBootstrap : MonoBehaviour
         _missionEntities = new Entity[missionTransforms.Length];
         for (int i = 0; i < missionTransforms.Length; i++)
             _missionEntities[i] = CreateMissionEntity(em, missionTransforms[i], i);
+
+        _immunityEntities = new Entity[immunityItemTransforms.Length];
+        for (int i = 0; i < immunityItemTransforms.Length; i++)
+            _immunityEntities[i] = CreateImmunityItemEntity(em, immunityItemTransforms[i], i);
     }
 
     // ── 建立各類 entity ───────────────────────────────────────────────────
@@ -78,6 +88,7 @@ public class ECSBootstrap : MonoBehaviour
             typeof(VehicleData),
             typeof(PlayerInputData),
             typeof(InteractFlashData),
+            typeof(PlayerImmunityData),
             typeof(LocalTransform));
 
         em.SetComponentData(e, new VehicleData
@@ -147,9 +158,27 @@ public class ECSBootstrap : MonoBehaviour
         return e;
     }
 
+    Entity CreateImmunityItemEntity(EntityManager em, Transform t, int index)
+    {
+        var e = em.CreateEntity(
+            typeof(ImmunityItemData),
+            typeof(ImmunityItemIndex),
+            typeof(LocalTransform));
+
+        em.SetComponentData(e, new ImmunityItemData
+        {
+            pickupRadius     = immunityPickupRadius,
+            immunityDuration = immunityDuration
+        });
+        em.SetComponentData(e, new ImmunityItemIndex { value = index });
+        em.SetComponentData(e, LocalTransform.FromPosition(t.position));
+        return e;
+    }
+
     // ── 供 Bridge 查詢 ────────────────────────────────────────────────────
 
-    public Entity GetPlayerEntity()           => _playerEntity;
-    public Entity GetCREntity(int index)      => _crEntities[index];
-    public Entity GetMissionEntity(int index) => _missionEntities[index];
+    public Entity GetPlayerEntity()                => _playerEntity;
+    public Entity GetCREntity(int index)           => _crEntities[index];
+    public Entity GetMissionEntity(int index)      => _missionEntities[index];
+    public Entity GetImmunityItemEntity(int index) => _immunityEntities[index];
 }

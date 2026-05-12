@@ -37,6 +37,7 @@ public struct PlayerSharedState : IComponentData
     public float3 position;
     public float3 velocity;
     public bool   interactThisFrame;
+    public bool   isImmune;          // 免疫期間 CRSystem 不觸發 phase change
 }
 
 // ── CR (NPC) ──────────────────────────────────────────────────────────────
@@ -73,6 +74,28 @@ public struct CRConfigData : IComponentData
 public struct RandomData : IComponentData
 {
     public Unity.Mathematics.Random rng;
+}
+
+// ── Immunity ──────────────────────────────────────────────────────────────
+/// <summary>掛在 Player entity 上，記錄免疫剩餘時間。</summary>
+public struct PlayerImmunityData : IComponentData
+{
+    public float timer;
+    public bool  isImmune;
+}
+
+/// <summary>免疫道具 entity 的資料。</summary>
+public struct ImmunityItemData : IComponentData
+{
+    public float pickupRadius;
+    public float immunityDuration;
+    public bool  isCollected;
+}
+
+/// <summary>用來讓 ImmunityItemBridge 找到對應 entity 的穩定 index。</summary>
+public struct ImmunityItemIndex : IComponentData
+{
+    public int value;
 }
 
 // ── MissionSpot ────────────────────────────────────────────────────────────

@@ -42,6 +42,7 @@ public partial class CRSystem : SystemBase
 
             // ── Interact trigger (Space key broadcast via singleton) ────
             if (playerState.interactThisFrame &&
+                !playerState.isImmune &&
                 state.ValueRO.timer >= state.ValueRO.nextTriggerTime)
             {
                 float3 flatSelf   = Flatten(transform.ValueRO.Position);
