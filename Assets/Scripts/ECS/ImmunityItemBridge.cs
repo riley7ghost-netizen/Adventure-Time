@@ -17,6 +17,9 @@ public class ImmunityItemBridge : MonoBehaviour
     EntityManager _em;
     bool          _initialized;
 
+    /// <summary>ECSBootstrap 在 Instantiate 後立即呼叫，設定對應的 entity index。</summary>
+    public void Init(int index) => itemIndex = index;
+
     void Start()
     {
         _rend = GetComponent<Renderer>();

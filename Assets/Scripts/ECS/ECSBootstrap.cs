@@ -46,10 +46,13 @@ public class ECSBootstrap : MonoBehaviour
     [SerializeField] float missionCompleteTime = 20f;
     [SerializeField] float missionSpotRadius   = 2f;
 
-    [Header("Immunity Items")]
-    [SerializeField] Transform[] immunityItemTransforms;
-    [SerializeField] float immunityPickupRadius = 2f;
-    [SerializeField] float immunityDuration     = 60f;
+    [Header("Immunity Items (runtime spawned)")]
+    [SerializeField] GameObject immunityItemPrefab;       // 帶有 ImmunityItemBridge 的 Prefab
+    [SerializeField] int        immunityItemCount  = 1;   // 一次生成幾個
+    [SerializeField] Vector3    immunitySpawnCenter = Vector3.zero; // 生成範圍中心
+    [SerializeField] float      immunitySpawnRadius = 20f;          // 生成範圍半徑
+    [SerializeField] float      immunityPickupRadius = 2f;
+    [SerializeField] float      immunityDuration     = 10f;
 
     // Entity handles — TransformSyncBridge / VisualBridge 透過這裡取得對應 entity
     Entity   _playerEntity;
@@ -74,9 +77,18 @@ public class ECSBootstrap : MonoBehaviour
         for (int i = 0; i < missionTransforms.Length; i++)
             _missionEntities[i] = CreateMissionEntity(em, missionTransforms[i], i);
 
-        _immunityEntities = new Entity[immunityItemTransforms.Length];
-        for (int i = 0; i < immunityItemTransforms.Length; i++)
-            _immunityEntities[i] = CreateImmunityItemEntity(em, immunityItemTransforms[i], i);
+        _immunityEntities = new Entity[immunityItemCount];
+        for (int i = 0; i < immunityItemCount; i++)
+        {
+            var spawnPos = RandomPointInCircle(immunitySpawnCenter, immunitySpawnRadius);
+            _immunityEntities[i] = CreateImmunityItemEntity(em, spawnPos, i);
+
+            if (immunityItemPrefab != null)
+            {
+                var go = Instantiate(immunityItemPrefab, spawnPos, Quaternion.identity);
+                go.GetComponent<ImmunityItemBridge>()?.Init(i);
+            }
+        }
     }
 
     // ── 建立各類 entity ───────────────────────────────────────────────────
@@ -158,7 +170,7 @@ public class ECSBootstrap : MonoBehaviour
         return e;
     }
 
-    Entity CreateImmunityItemEntity(EntityManager em, Transform t, int index)
+    Entity CreateImmunityItemEntity(EntityManager em, Vector3 position, int index)
     {
         var e = em.CreateEntity(
             typeof(ImmunityItemData),
@@ -171,7 +183,7 @@ public class ECSBootstrap : MonoBehaviour
             immunityDuration = immunityDuration
         });
         em.SetComponentData(e, new ImmunityItemIndex { value = index });
-        em.SetComponentData(e, LocalTransform.FromPosition(t.position));
+        em.SetComponentData(e, LocalTransform.FromPosition(position));
         return e;
     }
 
@@ -181,4 +193,11 @@ public class ECSBootstrap : MonoBehaviour
     public Entity GetCREntity(int index)           => _crEntities[index];
     public Entity GetMissionEntity(int index)      => _missionEntities[index];
     public Entity GetImmunityItemEntity(int index) => _immunityEntities[index];
+
+    // XZ 平面上的圓形範圍內取隨機點，Y 保持與 center 相同
+    static Vector3 RandomPointInCircle(Vector3 center, float radius)
+    {
+        var offset = UnityEngine.Random.insideUnitCircle * radius;
+        return new Vector3(center.x + offset.x, center.y, center.z + offset.y);
+    }
 }
