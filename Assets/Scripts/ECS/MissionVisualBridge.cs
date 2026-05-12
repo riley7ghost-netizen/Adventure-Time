@@ -56,5 +56,9 @@ public class MissionVisualBridge : MonoBehaviour
         entities.Dispose();
     }
 
-    void OnDestroy() { if (_initialized) _query.Dispose(); }
+    void OnDestroy()
+    {
+        if (_initialized && World.DefaultGameObjectInjectionWorld is { IsCreated: true })
+            _query.Dispose();
+    }
 }
