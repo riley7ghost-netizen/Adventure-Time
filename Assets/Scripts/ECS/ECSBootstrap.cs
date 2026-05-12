@@ -13,20 +13,27 @@ public class ECSBootstrap : MonoBehaviour
 {
     public static ECSBootstrap Instance { get; private set; }
 
+    /// <summary>每個 CR 各自的巡邏範圍設定。</summary>
+    [System.Serializable]
+    public class CREntry
+    {
+        public Transform transform;
+        public float     areaRadius = 25f;
+        // areaCenter 自動使用 transform.position，不需要在 Inspector 重複設定
+    }
+
     [Header("Player")]
     [SerializeField] Transform playerTransform;
     [SerializeField] float playerMaxSpeed = 10f;
     [SerializeField] float playerMaxForce = 60f;
     [SerializeField] float playerMass     = 1f;
 
-    [Header("CR NPCs (shared config, drag 6 CRs)")]
-    [SerializeField] Transform[] crTransforms;
+    [Header("CR NPCs")]
+    [SerializeField] CREntry[] crEntries;           // 每個 CR 有自己的 areaCenter / areaRadius
     [SerializeField] float crMaxSpeed          = 3f;
     [SerializeField] float crMaxForce          = 10f;
     [SerializeField] float crMass              = 1f;
     [SerializeField] float crTurnSpeed         = 120f;
-    [SerializeField] float crAreaRadius        = 25f;
-    [SerializeField] Vector3 crAreaCenter      = new(0f, 1f, 0f);
     [SerializeField] float crTriggerDistance   = 20f;
     [SerializeField] float crKeyCooldown       = 0.5f;
     [SerializeField] float crChaseFleeDuration = 5f;
@@ -44,17 +51,18 @@ public class ECSBootstrap : MonoBehaviour
     Entity[] _crEntities;
     Entity[] _missionEntities;
 
-    void Awake() => Instance = this;
-
-    void Start()
+    void Awake()
     {
+        Instance = this;
+
+        // 在 Awake 建立 entity，確保所有 TransformSyncBridge.Start() 執行時 entity 已存在
         var em = World.DefaultGameObjectInjectionWorld.EntityManager;
 
         _playerEntity = CreatePlayerEntity(em);
 
-        _crEntities = new Entity[crTransforms.Length];
-        for (int i = 0; i < crTransforms.Length; i++)
-            _crEntities[i] = CreateCREntity(em, crTransforms[i], i);
+        _crEntities = new Entity[crEntries.Length];
+        for (int i = 0; i < crEntries.Length; i++)
+            _crEntities[i] = CreateCREntity(em, crEntries[i], i);
 
         _missionEntities = new Entity[missionTransforms.Length];
         for (int i = 0; i < missionTransforms.Length; i++)
@@ -82,7 +90,7 @@ public class ECSBootstrap : MonoBehaviour
         return e;
     }
 
-    Entity CreateCREntity(EntityManager em, Transform t, int index)
+    Entity CreateCREntity(EntityManager em, CREntry entry, int index)
     {
         var e = em.CreateEntity(
             typeof(CRTag),
@@ -97,8 +105,8 @@ public class ECSBootstrap : MonoBehaviour
             maxForce          = crMaxForce,
             mass              = crMass,
             turnSpeed         = crTurnSpeed,
-            areaRadius        = crAreaRadius,
-            areaCenter        = new float3(crAreaCenter.x, crAreaCenter.y, crAreaCenter.z),
+            areaRadius        = entry.areaRadius,
+            areaCenter        = new float3(entry.transform.position.x, entry.transform.position.y, entry.transform.position.z),
             triggerDistance   = crTriggerDistance,
             keyCooldown       = crKeyCooldown,
             chaseFleeDuration = crChaseFleeDuration,
@@ -113,12 +121,11 @@ public class ECSBootstrap : MonoBehaviour
             wanderAngle     = UnityEngine.Random.Range(0f, 360f)
         });
 
-        // 每個 CR 用位置 hash + index 產生不同的 seed
+        var t = entry.transform;
         uint seed = (uint)((t.position.GetHashCode() * 397) ^ (index + 1));
         if (seed == 0) seed = 1;
         em.SetComponentData(e, new RandomData { rng = new Unity.Mathematics.Random(seed) });
-        em.SetComponentData(e, LocalTransform.FromPositionRotation(
-            t.position, t.rotation));
+        em.SetComponentData(e, LocalTransform.FromPositionRotation(t.position, t.rotation));
 
         return e;
     }
