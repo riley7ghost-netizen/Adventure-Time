@@ -98,6 +98,36 @@ public struct ImmunityItemIndex : IComponentData
     public int value;
 }
 
+// ── CR Spawn Command (FM Command Pattern) ────────────────────────────────────
+/// <summary>Singleton: holds the CR template (Prefab) entity created by CRFactory.</summary>
+public struct CRPrefabData : IComponentData
+{
+    public Entity value;
+}
+
+/// <summary>
+/// 一個短命 entity，代表「在此位置生成一個 CR」的請求。
+/// CRFactory.Awake() 發出，SpawnCRSystem 消費後銷毀。
+/// </summary>
+public struct SpawnCRCommand : IComponentData
+{
+    public float3     position;
+    public quaternion rotation;
+    public float3     areaCenter;
+    public float      areaRadius;
+    public uint       rngSeed;
+    public int        spawnIndex;   // 成為 CRSpawnIndex.value
+}
+
+/// <summary>
+/// 每個已生成的 CR entity 的穩定 index。
+/// TransformSyncBridge 用來定位對應的 entity。
+/// </summary>
+public struct CRSpawnIndex : IComponentData
+{
+    public int value;
+}
+
 // ── MissionSpot ────────────────────────────────────────────────────────────
 public struct MissionSpotData : IComponentData
 {
