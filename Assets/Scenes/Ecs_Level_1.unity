@@ -562,6 +562,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5950478122587620105, guid: dbdb88fd50666524db4fea0b0e6fd14c, type: 3}
+      propertyPath: rend
+      value: 
+      objectReference: {fileID: 445751390}
     - target: {fileID: 7040660113542483274, guid: dbdb88fd50666524db4fea0b0e6fd14c, type: 3}
       propertyPath: m_Name
       value: Spot 4
@@ -574,6 +578,11 @@ PrefabInstance:
 --- !u!4 &445751386 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2453442267836173334, guid: dbdb88fd50666524db4fea0b0e6fd14c, type: 3}
+  m_PrefabInstance: {fileID: 445751385}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &445751390 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2537012952462328538, guid: dbdb88fd50666524db4fea0b0e6fd14c, type: 3}
   m_PrefabInstance: {fileID: 445751385}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &554920037
@@ -939,6 +948,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &751899144 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2537012952462328538, guid: dbdb88fd50666524db4fea0b0e6fd14c, type: 3}
+  m_PrefabInstance: {fileID: 3849884831571943489}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1102,6 +1116,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5950478122587620105, guid: dbdb88fd50666524db4fea0b0e6fd14c, type: 3}
+      propertyPath: rend
+      value: 
+      objectReference: {fileID: 1804403643}
     - target: {fileID: 7040660113542483274, guid: dbdb88fd50666524db4fea0b0e6fd14c, type: 3}
       propertyPath: m_Name
       value: Spot 3
@@ -1296,6 +1314,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5950478122587620105, guid: dbdb88fd50666524db4fea0b0e6fd14c, type: 3}
+      propertyPath: rend
+      value: 
+      objectReference: {fileID: 1593538338}
     - target: {fileID: 7040660113542483274, guid: dbdb88fd50666524db4fea0b0e6fd14c, type: 3}
       propertyPath: m_Name
       value: Spot 2
@@ -1309,6 +1331,16 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 2453442267836173334, guid: dbdb88fd50666524db4fea0b0e6fd14c, type: 3}
   m_PrefabInstance: {fileID: 1593538333}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1593538338 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2537012952462328538, guid: dbdb88fd50666524db4fea0b0e6fd14c, type: 3}
+  m_PrefabInstance: {fileID: 1593538333}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1804403643 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2537012952462328538, guid: dbdb88fd50666524db4fea0b0e6fd14c, type: 3}
+  m_PrefabInstance: {fileID: 1509078945}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &1950270460 stripped
 Transform:
@@ -1363,6 +1395,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5950478122587620105, guid: dbdb88fd50666524db4fea0b0e6fd14c, type: 3}
+      propertyPath: rend
+      value: 
+      objectReference: {fileID: 751899144}
     - target: {fileID: 7040660113542483274, guid: dbdb88fd50666524db4fea0b0e6fd14c, type: 3}
       propertyPath: m_Name
       value: Spot 1

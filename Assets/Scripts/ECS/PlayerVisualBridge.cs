@@ -9,29 +9,33 @@ using UnityEngine;
 [RequireComponent(typeof(Renderer))]
 public class PlayerVisualBridge : MonoBehaviour
 {
-    [SerializeField] Color immuneColor = Color.cyan;
+    [SerializeField] Color normalColor  = Color.white;
+    [SerializeField] Color actionColor  = Color.red;
+    [SerializeField] Color missionColor = Color.green;
+    [SerializeField] Color immuneColor  = Color.cyan;
 
     Renderer      _rend;
-    Color         _originalColor;
     EntityManager _em;
     EntityQuery   _query;
+    EntityQuery   _missionQuery;
     bool          _initialized;
     bool          _wasImmune;   // 上一幀的免疫狀態，用來偵測狀態切換
 
     void Start()
     {
-        _rend          = GetComponent<Renderer>();
-        _originalColor = _rend.material.color;
+        _rend = GetComponent<Renderer>();
 
         var world = World.DefaultGameObjectInjectionWorld;
         if (world == null) return;
 
-        _em    = world.EntityManager;
-        _query = _em.CreateEntityQuery(
+        _em           = world.EntityManager;
+        _query        = _em.CreateEntityQuery(
             ComponentType.ReadOnly<PlayerTag>(),
             ComponentType.ReadOnly<InteractFlashData>(),
             ComponentType.ReadOnly<PlayerImmunityData>());
-        _initialized = true;
+        _missionQuery = _em.CreateEntityQuery(
+            ComponentType.ReadOnly<MissionSpotData>());
+        _initialized  = true;
     }
 
     void LateUpdate()
@@ -42,13 +46,20 @@ public class PlayerVisualBridge : MonoBehaviour
         var flash    = _em.GetComponentData<InteractFlashData>(e);
         var immunity = _em.GetComponentData<PlayerImmunityData>(e);
 
-        // 優先序：閃紅 > 免疫 > 原色
+        // 檢查是否有任何 mission spot 包含玩家
+        bool inMission = false;
+        var spots = _missionQuery.ToComponentDataArray<MissionSpotData>(Unity.Collections.Allocator.Temp);
+        foreach (var s in spots) { if (s.playerInside) { inMission = true; break; } }
+        spots.Dispose();
+
         if (flash.active)
-            _rend.material.color = Color.red;
+            _rend.material.color = actionColor;
         else if (immunity.isImmune)
             _rend.material.color = immuneColor;
+        else if (inMission)
+            _rend.material.color = missionColor;
         else
-            _rend.material.color = _originalColor;
+            _rend.material.color = normalColor;
 
         // 狀態切換時觸發（之後在這裡加特效）
         if (immunity.isImmune != _wasImmune)
@@ -72,6 +83,9 @@ public class PlayerVisualBridge : MonoBehaviour
     void OnDestroy()
     {
         if (_initialized && World.DefaultGameObjectInjectionWorld is { IsCreated: true })
+        {
             _query.Dispose();
+            _missionQuery.Dispose();
+        }
     }
 }
