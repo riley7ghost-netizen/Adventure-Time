@@ -880,46 +880,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed46dfe019c356c4f8453d0fa650720a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTransform: {fileID: 554920041}
-  playerMaxSpeed: 10
-  playerMaxForce: 60
-  playerMass: 1
-  crEntries:
-  - transform: {fileID: 1950270460}
-    areaRadius: 25
-  - transform: {fileID: 1493297054}
-    areaRadius: 25
-  - transform: {fileID: 1537287892}
-    areaRadius: 25
-  - transform: {fileID: 1583866270}
-    areaRadius: 25
-  - transform: {fileID: 308544464}
-    areaRadius: 25
-  - transform: {fileID: 90241107}
-    areaRadius: 25
-  crMaxSpeed: 3
-  crMaxForce: 10
-  crMass: 1
-  crTurnSpeed: 120
-  crTriggerDistance: 20
-  crKeyCooldown: 0.5
-  crChaseFleeDuration: 5
-  crWanderDistance: 2
-  crWanderRadius: 1.5
-  crWanderJitter: 40
-  missionTransforms:
-  - {fileID: 375675398}
-  - {fileID: 1593538334}
-  - {fileID: 1509078946}
-  - {fileID: 445751386}
-  missionCompleteTime: 20
-  missionSpotRadius: 2
-  immunityItemPrefab: {fileID: 7610231290830452363, guid: 8901e93cae3491f47a41b9b05c235c04, type: 3}
-  immunityItemCount: 1
-  immunitySpawnCenter: {x: 0, y: 0, z: 0}
-  immunitySpawnRadius: 20
-  immunityPickupRadius: 2
-  immunityDuration: 10
+  playerFactory:
+    playerTransform: {fileID: 554920041}
+    maxSpeed: 10
+    maxForce: 60
+    mass: 1
+  crFactory:
+    crEntries:
+    - transform: {fileID: 1950270460}
+      areaRadius: 10
+    - transform: {fileID: 1493297054}
+      areaRadius: 10
+    - transform: {fileID: 1537287892}
+      areaRadius: 10
+    - transform: {fileID: 1583866270}
+      areaRadius: 10
+    - transform: {fileID: 308544464}
+      areaRadius: 10
+    - transform: {fileID: 90241107}
+      areaRadius: 10
+    maxSpeed: 3
+    maxForce: 10
+    mass: 1
+    turnSpeed: 120
+    triggerDistance: 20
+    keyCooldown: 0.5
+    chaseFleeDuration: 5
+    wanderDistance: 2
+    wanderRadius: 1.5
+    wanderJitter: 40
+  missionFactory:
+    spotTransforms:
+    - {fileID: 375675398}
+    - {fileID: 1593538334}
+    - {fileID: 1509078946}
+    - {fileID: 445751386}
+    completeTime: 20
+    spotRadius: 2
+  immunityFactory:
+    itemPrefab: {fileID: 0}
+    count: 1
+    spawnCenter: {x: 0, y: 0, z: 0}
+    spawnRadius: 20
+    pickupRadius: 2
+    duration: 10
 --- !u!4 &657961774
 Transform:
   m_ObjectHideFlags: 0
